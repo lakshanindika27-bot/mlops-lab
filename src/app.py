@@ -1,8 +1,12 @@
+import os
+
 import joblib
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-artifact = joblib.load("models/model.joblib")
+MODEL_PATH = os.getenv("MODEL_PATH", "models/model.joblib")
+
+artifact = joblib.load(MODEL_PATH)
 model = artifact["model"]
 labels = artifact["labels"]
 
