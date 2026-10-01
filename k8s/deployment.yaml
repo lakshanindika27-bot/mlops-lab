@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: mlops-lab:v1
+          image: mlops-lab:v3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -41,9 +41,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mlops-api
+  labels:
+    app: mlops-api
 spec:
   selector:
     app: mlops-api
   ports:
-    - port: 80
+    - name: http
+      port: 80
       targetPort: 8000

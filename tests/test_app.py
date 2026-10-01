@@ -52,3 +52,10 @@ def test_predict_returns_valid_label(client):
 def test_predict_missing_text_is_rejected(client):
     r = client.post("/predict", json={})
     assert r.status_code == 422
+
+
+def test_metrics_endpoint(client):
+    client.post("/predict", json={"text": "nasa rocket launch"})
+    r = client.get("/metrics/")
+    assert r.status_code == 200
+    assert "predictions_total" in r.text
