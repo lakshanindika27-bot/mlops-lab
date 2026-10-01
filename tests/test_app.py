@@ -52,35 +52,3 @@ def test_predict_returns_valid_label(client):
 def test_predict_missing_text_is_rejected(client):
     r = client.post("/predict", json={})
     assert r.status_code == 422
-EOpython -m pytest -v
-ruff check .
-mkdir -p .github/workflows
-cat > .github/workflows/ci.yml << 'EOF'
-name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
-          cache: pip
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install pytest httpx ruff
-
-      - name: Lint
-        run: ruff check .
-
-      - name: Test
-        run: python -m pytest -v
