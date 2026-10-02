@@ -53,3 +53,14 @@ The model file is tracked with DVC and stored on DagsHub storage (S3-compatible)
     dvc remote modify dagshub --local access_key_id YOUR_TOKEN
     dvc remote modify dagshub --local secret_access_key YOUR_TOKEN
     dvc pull
+
+## Model registry
+
+Training runs are logged to MLflow (hosted on DagsHub) and every trained model is registered as a new version of `newsgroups-classifier`. The version that should serve traffic carries the `production` alias.
+
+    python src/train.py                      # logs a run and registers a new model version
+    python src/promote.py                    # points the alias at the best version (by accuracy)
+    python src/promote.py 3                  # manual promotion / rollback to version 3
+    MODEL_URI="models:/newsgroups-classifier@production" uvicorn src.app:app
+
+Without `MODEL_URI` the API falls back to the local `models/model.joblib`.
