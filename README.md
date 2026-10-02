@@ -36,3 +36,20 @@ End-to-end MLOps pipeline for a text classifier (20 Newsgroups: sci.space, rec.a
 
     python -m pytest -v
     ruff check .
+
+## CI/CD
+
+GitHub Actions runs on every push to `main`:
+
+1. `ruff check` and `pytest`
+2. `dvc pull` of the model from the DagsHub DVC remote (token stored as the `DAGSHUB_TOKEN` secret)
+3. Docker image build
+4. Smoke test of the running container (`/health` and `/predict`)
+
+## Data versioning
+
+The model file is tracked with DVC and stored on DagsHub storage (S3-compatible). To fetch it locally:
+
+    dvc remote modify dagshub --local access_key_id YOUR_TOKEN
+    dvc remote modify dagshub --local secret_access_key YOUR_TOKEN
+    dvc pull
