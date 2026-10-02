@@ -5,11 +5,18 @@ from fastapi import FastAPI
 from prometheus_client import Counter, Histogram, make_asgi_app
 from pydantic import BaseModel
 
+MODEL_URI = os.getenv("MODEL_URI")
 MODEL_PATH = os.getenv("MODEL_PATH", "models/model.joblib")
 
-artifact = joblib.load(MODEL_PATH)
-model = artifact["model"]
-labels = artifact["labels"]
+if MODEL_URI:
+    import mlflow.sklearn
+
+    model = mlflow.sklearn.load_model(MODEL_URI)
+    labels = list(model.classes_)
+else:
+    artifact = joblib.load(MODEL_PATH)
+    model = artifact["model"]
+    labels = artifact["labels"]
 
 PREDICTIONS = Counter("predictions_total", "Total predictions", ["label"])
 LATENCY = Histogram("predict_latency_seconds", "Latency of /predict")
