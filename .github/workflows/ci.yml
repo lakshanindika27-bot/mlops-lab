@@ -26,3 +26,34 @@ jobs:
 
       - name: Test
         run: python -m pytest -v
+
+  docker:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Pull model with DVC
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DAGSHUB_TOKEN }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          pip install "dvc[s3]"
+          dvc pull
+
+      - name: Build image
+        run: docker build -t mlops-lab:ci .
+
+      - name: Smoke test container
+        run: |
+          docker run -d --name api -p 8000:8000 mlops-lab:ci
+          for i in $(seq 1 20); do curl -sf http://localhost:8000/health && break; sleep 2; done
+          curl -sf -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            -d '{"text": "NASA launched a rocket to the moon"}'
+          docker logs api
