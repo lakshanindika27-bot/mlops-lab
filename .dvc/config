@@ -1,4 +1,7 @@
 [core]
-    remote = localstore
+    remote = dagshub
 ['remote "localstore"']
     url = /home/laksh/dvc-storage
+['remote "dagshub"']
+    url = s3://dvc
+    endpointurl = https://dagshub.com/lakshanindika27-bot/mlops-lab.s3
