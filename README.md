@@ -8,7 +8,7 @@ End-to-end MLOps pipeline for a text classifier (20 Newsgroups: sci.space, rec.a
 
 - **Model**: scikit-learn (TF-IDF + Logistic Regression), accuracy ~0.86
 - **Serving**: FastAPI (`/health`, `/predict`, `/metrics`)
-- **Experiment tracking**: MLflow
+- **Experiment tracking & model registry**: MLflow (DagsHub), `production` alias
 - **Data/model versioning**: DVC
 - **Containerization**: Docker
 - **CI**: GitHub Actions (ruff + pytest)
