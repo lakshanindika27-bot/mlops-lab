@@ -13,10 +13,12 @@ if MODEL_URI:
 
     model = mlflow.sklearn.load_model(MODEL_URI)
     labels = list(model.classes_)
+    print(f"Loaded model from registry: {MODEL_URI}", flush=True)
 else:
     artifact = joblib.load(MODEL_PATH)
     model = artifact["model"]
     labels = artifact["labels"]
+    print(f"Loaded model from file: {MODEL_PATH}", flush=True)
 
 PREDICTIONS = Counter("predictions_total", "Total predictions", ["label"])
 LATENCY = Histogram("predict_latency_seconds", "Latency of /predict")

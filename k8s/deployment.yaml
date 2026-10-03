@@ -14,10 +14,16 @@ spec:
     spec:
       containers:
         - name: api
-          image: mlops-lab:v3
+          image: mlops-lab:v5
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: mlflow-creds
+          env:
+            - name: MODEL_URI
+              value: "models:/newsgroups-classifier@production"
           readinessProbe:
             httpGet:
               path: /health
@@ -35,7 +41,7 @@ spec:
               cpu: 100m
               memory: 256Mi
             limits:
-              memory: 512Mi
+              memory: 1Gi
 ---
 apiVersion: v1
 kind: Service
