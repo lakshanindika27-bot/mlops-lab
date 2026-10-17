@@ -7,3 +7,4 @@ uvicorn[standard]==0.54.0
 pydantic==2.13.5
 prometheus-client==0.26.0
 mlflow==3.16.1
+evidently==0.7.23
