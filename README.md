@@ -101,3 +101,52 @@ registry version:
 | v1 | 1.0 / 20000 | 0.817 |
 | v2 | 10.0 / 20000 | 0.961 |
 | v3 | 0.5 / 5000 | 0.732 |
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[train.py] --> B[MLflow Model Registry]
+    A --> C[DVC + DagsHub]
+    B --> D[FastAPI /predict]
+    D --> E[Docker image]
+    E --> F[Kubernetes - kind]
+    F --> G[Prometheus]
+    G --> H[Grafana dashboard]
+    I[drift.py - Evidently] -.-> D
+```
+
+## Monitoring (Prometheus + Grafana)
+
+The API exposes `predictions_total` (by class) and `predict_latency_seconds`
+at `/metrics/`. A ServiceMonitor (`k8s-later/servicemonitor.yaml`) lets Prometheus
+scrape both pods. The dashboard is stored in `grafana/dashboard.json`
+(Requests/sec, Predictions by class, p95 latency).
+
+Install and import:
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install monitoring prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --create-namespace \
+  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+kubectl apply -f k8s-later/servicemonitor.yaml
+kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+```
+
+Then in Grafana: Dashboards > New > Import > upload `grafana/dashboard.json`.
+
+## Data drift (Evidently)
+
+`src/drift.py` compares reference data against "production" data using
+`n_chars`, `n_words`, model `confidence` and `prediction`.
+
+```bash
+python src/drift.py --scenario none    # same distribution: 0/4 columns drift
+python src/drift.py --scenario drift   # unseen topics: confidence + prediction drift
+```
+
+Reports are written to `reports/` (git-ignored).
+
+Key lesson: input features (text length) did not drift, but model outputs
+(confidence, prediction mix) did. Monitor outputs, not only inputs.
