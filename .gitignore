@@ -4,3 +4,4 @@ mlflow.db
 mlruns/
 reports/
 *.swp
+*.save
