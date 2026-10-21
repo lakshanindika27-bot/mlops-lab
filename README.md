@@ -150,3 +150,4 @@ Reports are written to `reports/` (git-ignored).
 
 Key lesson: input features (text length) did not drift, but model outputs
 (confidence, prediction mix) did. Monitor outputs, not only inputs.
+![Grafana dashboard](docs/grafana.png)
