@@ -14,6 +14,7 @@ End-to-end MLOps pipeline for a text classifier (20 Newsgroups: sci.space, rec.a
 - **CI**: GitHub Actions (ruff + pytest)
 - **Deployment**: Kubernetes (kind), 2 replicas with readiness/liveness probes
 - **Monitoring**: Prometheus + Grafana (kube-prometheus-stack via Helm), custom metrics `predictions_total` and `predict_latency_seconds`
+- **Drift detection**: Evidently (`src/drift.py`), reference vs production data
 
 ## Run locally
 
