@@ -155,3 +155,10 @@ Key lesson: input features (text length) did not drift, but model outputs
 ![Grafana dashboard](docs/grafana.jpg)
 
 ![Grafana dashboard](docs/grafana.jpg)
+
+### Drift metrics in Grafana
+
+`python src/drift.py --scenario drift --push` sends `drift_share`, `drift_columns`,
+`drift_p_value{column}` and `drift_detected{column}` to a Prometheus Pushgateway
+(`helm install pushgateway prometheus-community/prometheus-pushgateway -n monitoring`),
+and the dashboard shows them in the bottom row.
