@@ -154,3 +154,5 @@ Key lesson: input features (text length) did not drift, but model outputs
 ![Grafana dashboard](docs/grafana.png)
 
 ![Grafana dashboard](docs/grafana.jpg)
+
+![Grafana dashboard](docs/grafana.jpg)
