@@ -13,6 +13,8 @@ REMOVE = ("headers", "footers", "quotes")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--scenario", choices=["none", "drift"], default="none")
+parser.add_argument("--push", action="store_true")
+parser.add_argument("--gateway", default="localhost:9091")
 args = parser.parse_args()
 
 bundle = joblib.load("models/model.joblib")
@@ -58,3 +60,26 @@ os.makedirs("reports", exist_ok=True)
 out = f"reports/drift_{args.scenario}.html"
 snapshot.save_html(out)
 print(f"saved {out}")
+
+if args.push:
+    from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
+
+    result = snapshot.dict()
+    registry = CollectorRegistry()
+    share = Gauge("drift_share", "Share of drifted columns", registry=registry)
+    count = Gauge("drift_columns", "Number of drifted columns", registry=registry)
+    pval = Gauge("drift_p_value", "Per-column drift p-value", ["column"], registry=registry)
+    flag = Gauge("drift_detected", "1 if column drifted", ["column"], registry=registry)
+
+    for m in result["metrics"]:
+        name = m["metric_name"]
+        if name.startswith("DriftedColumnsCount"):
+            count.set(m["value"]["count"])
+            share.set(m["value"]["share"])
+        elif name.startswith("ValueDrift"):
+            col = m["config"]["column"]
+            pval.labels(column=col).set(m["value"])
+            flag.labels(column=col).set(1 if m["value"] < m["config"]["threshold"] else 0)
+
+    push_to_gateway(args.gateway, job="drift_check", grouping_key={"scenario": args.scenario}, registry=registry)
+    print(f"pushed to {args.gateway} (scenario={args.scenario})")
