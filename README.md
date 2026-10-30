@@ -162,3 +162,33 @@ Key lesson: input features (text length) did not drift, but model outputs
 `drift_p_value{column}` and `drift_detected{column}` to a Prometheus Pushgateway
 (`helm install pushgateway prometheus-community/prometheus-pushgateway -n monitoring`),
 and the dashboard shows them in the bottom row.
+
+## Infrastructure as Code (Terraform)
+
+The `terraform/` folder describes the API deployment as code, in two parts:
+
+- `main.tf`: runs the `mlops-lab:v5` image as a local Docker container
+  (`kreuzwerker/docker` provider, host port set by the `host_port` variable).
+- `k8s.tf`: creates a Deployment and Service named `mlops-api-tf` in the kind
+  cluster (`kubernetes` provider). It reuses the existing `mlflow-creds` Secret,
+  so no credentials are stored in the `.tf` files.
+
+```bash
+cd terraform
+terraform init
+terraform plan
+terraform apply -var="host_port=8003"      # Docker container
+terraform apply -var="replicas=3" \
+  -target=kubernetes_deployment_v1.api \
+  -target=kubernetes_service_v1.api        # Kubernetes resources
+terraform destroy
+```
+
+Notes:
+
+- `terraform.tfstate` and `.terraform/` are git-ignored (state can contain secrets).
+- Changing the Docker port forces a container replacement, while changing
+  `replicas` is an in-place update. `terraform plan` shows the difference before
+  anything is applied.
+- The Kubernetes resources use a separate name (`mlops-api-tf`), so they do not
+  touch the original `mlops-api` Deployment that Prometheus scrapes.
