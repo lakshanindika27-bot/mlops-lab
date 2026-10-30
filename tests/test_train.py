@@ -1,5 +1,4 @@
 import joblib
-import pytest
 
 from src import train
 
@@ -55,7 +54,7 @@ def test_main_end_to_end_without_network(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     out = tmp_path / "model.joblib"
 
-    acc, f1 = train.main(["--max-features", "50"], model_path=str(out))
+    acc, _f1 = train.main(["--max-features", "50"], model_path=str(out))
 
     assert out.exists()
     assert joblib.load(out)["labels"] == LABELS
