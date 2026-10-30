@@ -5,3 +5,7 @@ mlruns/
 reports/
 *.swp
 *.save
+
+.terraform/
+*.tfstate
+*.tfstate.*
